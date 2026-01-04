@@ -200,6 +200,12 @@ export default function Dashboard() {
                     )}
                     <button onClick={() => supabase.auth.signOut()} className="text-sm text-gray-500 hover:text-black">Sign Out</button>
                 </div>
+
+                {sites.length > 0 && (
+                    <p className="text-center text-xs text-gray-400 mt-8">
+                        * Automated reports are sent every Monday, but only if broken links are found.
+                    </p>
+                )}
             </div>
 
             {/* Add Site */}
