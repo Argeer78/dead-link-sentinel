@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
                 await supabaseAdmin.from('subscriptions').update({
                     status: subscription.status,
-                    current_period_end: new Date(subscription.current_period_end * 1000),
+                    current_period_end: new Date((subscription as any).current_period_end * 1000),
                     updated_at: new Date()
                 }).eq('stripe_subscription_id', subscription.id);
                 break;
