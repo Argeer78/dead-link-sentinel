@@ -37,8 +37,7 @@ export async function POST(req: Request) {
             success_url: `${req.headers.get('origin')}/dashboard?success=true`,
             cancel_url: `${req.headers.get('origin')}/dashboard?canceled=true`,
             automatic_tax: { enabled: true },
-            payment_method_configuration: undefined,
-            // payment_method_types: ['card'],
+            payment_method_types: ['card'], // Explicitly asking for card enables wallets attached to card flow
         });
 
         return NextResponse.json({ url: session.url });
