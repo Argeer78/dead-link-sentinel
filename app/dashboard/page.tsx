@@ -160,158 +160,157 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Dead Link Sentinel</h1>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-4">
-                        {!isPro && (
-                            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
-                                <button
-                                    onClick={() => setCurrency(c => c === 'usd' ? 'eur' : 'usd')}
-                                    className="text-xs font-bold px-2 py-1 rounded hover:bg-white transition-colors"
-                                >
-                                    {currency.toUpperCase()}
-                                </button>
-                                <div className="h-4 w-[1px] bg-gray-300"></div>
-                                <button
-                                    onClick={() => setInterval('month')}
-                                    className={cn("text-xs px-2 py-1 rounded transition-all", interval === 'month' ? "bg-white shadow-sm font-medium" : "text-gray-500")}
-                                >
-                                    Monthly
-                                </button>
-                                <button
-                                    onClick={() => setInterval('year')}
-                                    className={cn("text-xs px-2 py-1 rounded transition-all", interval === 'year' ? "bg-white shadow-sm font-medium" : "text-gray-500")}
-                                >
-                                    Yearly
-                                </button>
-                            </div>
-                        )}
-
-                        {isPro ? (
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">PRO</span>
-                        ) : (
-                            <button onClick={handleUpgrade} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-                                Upgrade ({currency === 'usd' ? '$' : '€'}{interval === 'month' ? '9' : '90'})
-                            </button>
-                        )}
-                        <button onClick={() => supabase.auth.signOut()} className="text-sm text-gray-500 hover:text-black">Sign Out</button>
-                    </div>
-                </div>
-
-                {/* Add Site */}
-                <div className="bg-white p-6 rounded-lg border shadow-sm mb-8">
-                    <h2 className="text-lg font-semibold mb-4">Monitor a new site</h2>
-                    <div className="flex gap-4 items-center">
-                        <form onSubmit={addSite} className="flex gap-4 flex-1">
-                            <input
-                                type="text"
-                                placeholder="example.com"
-                                value={newUrl}
-                                onChange={e => setNewUrl(e.target.value)}
-                                className="flex-1 p-2 border rounded-md"
-                                required
-                            />
+                    {!isPro && (
+                        <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
                             <button
-                                disabled={adding}
-                                className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+                                onClick={() => setCurrency(c => c === 'usd' ? 'eur' : 'usd')}
+                                className="text-xs font-bold px-2 py-1 rounded hover:bg-white transition-colors"
                             >
-                                {adding ? 'Adding...' : 'Add Site'}
+                                {currency.toUpperCase()}
                             </button>
-                        </form>
-                    </div>
-                    {!isPro && sites.length >= 1 && (
-                        <p className="text-xs text-amber-600 mt-2">Free plan limited to 1 site. Upgrade to add more.</p>
-                    )}
-                </div>
-
-                {/* Sites Grid */}
-                <div className="grid gap-4">
-                    {sites.map(site => (
-                        <div key={site.id} className="p-4 border rounded-lg bg-white flex justify-between items-center shadow-sm">
-                            <div>
-                                <a href={site.url} target="_blank" className="font-medium hover:underline flex items-center gap-2">
-                                    {site.url} <ExternalLink size={14} className="text-gray-400" />
-                                </a>
-                                <div className="text-sm text-gray-500 mt-1">
-                                    Status: <span className={cn(
-                                        "font-medium",
-                                        site.status === 'idle' && "text-gray-500",
-                                        site.status === 'crawling' && "text-blue-500",
-                                        site.status === 'error' && "text-red-500"
-                                    )}>{site.status.toUpperCase()}</span>
-                                    {site.last_checked_at && ` • Last Checked: ${new Date(site.last_checked_at).toLocaleDateString()}`}
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                                {/* View Report Link (Placeholder for now) */}
-                                {/* <a href={`/dashboard/${site.id}`} className="p-2 border rounded hover:bg-gray-50 text-sm">View Report</a> */}
-
-                                <button
-                                    onClick={() => runCheck(site.id)}
-                                    disabled={site.status === 'crawling'}
-                                    className="p-2 border rounded hover:bg-gray-50 text-blue-600 disabled:opacity-50"
-                                    title="Run Scan Now"
-                                >
-                                    <RefreshCw size={18} className={site.status === 'crawling' ? "animate-spin" : ""} />
-                                </button>
-                                <button
-                                    onClick={() => deleteSite(site.id)}
-                                    className="p-2 border rounded hover:bg-red-50 text-red-600"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
+                            <div className="h-4 w-[1px] bg-gray-300"></div>
+                            <button
+                                onClick={() => setInterval('month')}
+                                className={cn("text-xs px-2 py-1 rounded transition-all", interval === 'month' ? "bg-white shadow-sm font-medium" : "text-gray-500")}
+                            >
+                                Monthly
+                            </button>
+                            <button
+                                onClick={() => setInterval('year')}
+                                className={cn("text-xs px-2 py-1 rounded transition-all", interval === 'year' ? "bg-white shadow-sm font-medium" : "text-gray-500")}
+                            >
+                                Yearly
+                            </button>
                         </div>
-                    ))}
-                    {sites.length === 0 && <div className="text-center text-gray-400 py-10">No sites monitored yet. Add one above.</div>}
+                    )}
+
+                    {isPro ? (
+                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">PRO</span>
+                    ) : (
+                        <button onClick={handleUpgrade} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                            Upgrade ({currency === 'usd' ? '$' : '€'}{interval === 'month' ? '9' : '90'})
+                        </button>
+                    )}
+                    <button onClick={() => supabase.auth.signOut()} className="text-sm text-gray-500 hover:text-black">Sign Out</button>
                 </div>
             </div>
-            );
+
+            {/* Add Site */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm mb-8">
+                <h2 className="text-lg font-semibold mb-4">Monitor a new site</h2>
+                <div className="flex gap-4 items-center">
+                    <form onSubmit={addSite} className="flex gap-4 flex-1">
+                        <input
+                            type="text"
+                            placeholder="example.com"
+                            value={newUrl}
+                            onChange={e => setNewUrl(e.target.value)}
+                            className="flex-1 p-2 border rounded-md"
+                            required
+                        />
+                        <button
+                            disabled={adding}
+                            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+                        >
+                            {adding ? 'Adding...' : 'Add Site'}
+                        </button>
+                    </form>
+                </div>
+                {!isPro && sites.length >= 1 && (
+                    <p className="text-xs text-amber-600 mt-2">Free plan limited to 1 site. Upgrade to add more.</p>
+                )}
+            </div>
+
+            {/* Sites Grid */}
+            <div className="grid gap-4">
+                {sites.map(site => (
+                    <div key={site.id} className="p-4 border rounded-lg bg-white flex justify-between items-center shadow-sm">
+                        <div>
+                            <a href={site.url} target="_blank" className="font-medium hover:underline flex items-center gap-2">
+                                {site.url} <ExternalLink size={14} className="text-gray-400" />
+                            </a>
+                            <div className="text-sm text-gray-500 mt-1">
+                                Status: <span className={cn(
+                                    "font-medium",
+                                    site.status === 'idle' && "text-gray-500",
+                                    site.status === 'crawling' && "text-blue-500",
+                                    site.status === 'error' && "text-red-500"
+                                )}>{site.status.toUpperCase()}</span>
+                                {site.last_checked_at && ` • Last Checked: ${new Date(site.last_checked_at).toLocaleDateString()}`}
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                            {/* View Report Link (Placeholder for now) */}
+                            {/* <a href={`/dashboard/${site.id}`} className="p-2 border rounded hover:bg-gray-50 text-sm">View Report</a> */}
+
+                            <button
+                                onClick={() => runCheck(site.id)}
+                                disabled={site.status === 'crawling'}
+                                className="p-2 border rounded hover:bg-gray-50 text-blue-600 disabled:opacity-50"
+                                title="Run Scan Now"
+                            >
+                                <RefreshCw size={18} className={site.status === 'crawling' ? "animate-spin" : ""} />
+                            </button>
+                            <button
+                                onClick={() => deleteSite(site.id)}
+                                className="p-2 border rounded hover:bg-red-50 text-red-600"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+                {sites.length === 0 && <div className="text-center text-gray-400 py-10">No sites monitored yet. Add one above.</div>}
+            </div>
+        </div>
+    );
 }
 
-            function LoginPage() {
+function LoginPage() {
     const [email, setEmail] = useState('');
-            const [sent, setSent] = useState(false);
+    const [sent, setSent] = useState(false);
 
-            async function login(e: React.FormEvent) {
-                e.preventDefault();
-            const {error} = await supabase.auth.signInWithOtp({
-                email,
-                options: {
+    async function login(e: React.FormEvent) {
+        e.preventDefault();
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
                 emailRedirectTo: `${window.location.origin}/auth/callback`
             }
         });
-            if (error) alert(error.message);
-            else setSent(true);
+        if (error) alert(error.message);
+        else setSent(true);
     }
 
-            return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="max-w-md w-full bg-white p-8 rounded-lg border shadow-sm">
-                    <h1 className="text-2xl font-bold mb-2">Dead Link Sentinel</h1>
-                    <p className="text-gray-500 mb-6">Honest site monitoring.</p>
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="max-w-md w-full bg-white p-8 rounded-lg border shadow-sm">
+                <h1 className="text-2xl font-bold mb-2">Dead Link Sentinel</h1>
+                <p className="text-gray-500 mb-6">Honest site monitoring.</p>
 
-                    {sent ? (
-                        <div className="bg-green-50 text-green-800 p-4 rounded text-center">
-                            Check your email for the magic link!
+                {sent ? (
+                    <div className="bg-green-50 text-green-800 p-4 rounded text-center">
+                        Check your email for the magic link!
+                    </div>
+                ) : (
+                    <form onSubmit={login} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Email</label>
+                            <input
+                                className="w-full p-2 border rounded"
+                                type="email"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                required
+                            />
                         </div>
-                    ) : (
-                        <form onSubmit={login} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Email</label>
-                                <input
-                                    className="w-full p-2 border rounded"
-                                    type="email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
-                                Send Magic Link
-                            </button>
-                        </form>
-                    )}
-                </div>
+                        <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+                            Send Magic Link
+                        </button>
+                    </form>
+                )}
             </div>
-            )
+        </div>
+    )
 }
