@@ -77,8 +77,10 @@ export default function Dashboard() {
         if (!session || !newUrl) return;
 
         // Limit Check
-        const isPro = subscription?.status === 'active';
-        if (!isPro && sites.length >= 1) {
+        const isAdmin = session?.user?.email === 'sgouros2305@gmail.com';
+        const isActive = subscription?.status === 'active';
+
+        if (!isAdmin && !isActive && sites.length >= 1) {
             alert('Free plan is limited to 1 site. Please upgrade to Pro.');
             return;
         }
