@@ -8,16 +8,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
     try {
-        // 1. Verify User (simplified for MVP - ideally use server-side auth helper)
-        const { userId, email } = await req.json();
+        // 2. Select Price ID based on User Choice
+        const { userId, email, interval = 'month', currency = 'usd' } = await req.json();
 
-        if (!userId || !email) {
-            return NextResponse.json({ error: 'Missing user data' }, { status: 400 });
+        let priceId;
+        if (currency === 'eur') {
+            priceId = interval === 'year'
+                ? process.env.STRIPE_PRICE_ID_EUR_YEARLY
+                : process.env.STRIPE_PRICE_ID_EUR_MONTHLY;
+        } else {
+            // Default to USD
+            priceId = interval === 'year'
+                ? process.env.STRIPE_PRICE_ID_USD_YEARLY
+                : process.env.STRIPE_PRICE_ID_USD_MONTHLY;
         }
 
-        const priceId = process.env.STRIPE_PRICE_ID;
         if (!priceId) {
-            return NextResponse.json({ error: 'Stripe price not configured' }, { status: 500 });
+            // Fallback to the generic one if specific not found
+            priceId = process.env.STRIPE_PRICE_ID;
+        }
+
+        if (!priceId) {
+            return NextResponse.json({ error: 'Price configuration missing' }, { status: 500 });
         }
 
         // 2. Create Checkout Session
