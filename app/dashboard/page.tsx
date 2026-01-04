@@ -186,10 +186,11 @@ export default function Dashboard() {
 
                     {isPro ? (
                         <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">PRO</span>
-                    ) : (
-                        <button onClick={handleUpgrade} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-                            Upgrade ({currency === 'usd' ? '$' : '€'}{interval === 'month' ? '9' : '90'})
-                        </button>
+                    ) : <button onClick={handleUpgrade} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                        Upgrade ({currency === 'usd'
+                            ? (interval === 'month' ? '$9.00' : '$90.00')
+                            : (interval === 'month' ? '€7.99' : '€80.00')})
+                    </button>
                     )}
                     <button onClick={() => supabase.auth.signOut()} className="text-sm text-gray-500 hover:text-black">Sign Out</button>
                 </div>
