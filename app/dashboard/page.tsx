@@ -153,7 +153,8 @@ export default function Dashboard() {
     if (loading) return <div className="p-10">Loading...</div>;
     if (!session) return <LoginPage />;
 
-    const isPro = subscription?.status === 'active';
+    const isAdmin = session?.user?.email === 'sgouros2305@gmail.com';
+    const isPro = subscription?.status === 'active' || isAdmin;
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -185,7 +186,9 @@ export default function Dashboard() {
                     )}
 
                     {isPro ? (
-                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">PRO</span>
+                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">
+                            {isAdmin ? 'ADMIN' : 'PRO'}
+                        </span>
                     ) : (
                         <button onClick={handleUpgrade} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
                             Upgrade ({currency === 'usd'
