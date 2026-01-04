@@ -33,8 +33,16 @@ export async function POST(req: Request) {
                 },
             ],
             mode: 'subscription',
+            allow_promotion_codes: true,
+            allow_promotion_codes: true,
             success_url: `${req.headers.get('origin')}/dashboard?success=true`,
             cancel_url: `${req.headers.get('origin')}/dashboard?canceled=true`,
+            automatic_tax: { enabled: true },
+            payment_method_configuration: undefined, // Let dashboard control it
+            // payment_method_types: ['card'], // Removing this lets the dashboard settings take over!
+            automatic_tax: { enabled: true },
+            payment_method_configuration: undefined, // Let dashboard control it
+            // payment_method_types: ['card'], // Removing this lets the dashboard settings take over!
         });
 
         return NextResponse.json({ url: session.url });
