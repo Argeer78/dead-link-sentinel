@@ -15,15 +15,25 @@ export default function Dashboard() {
     const [newUrl, setNewUrl] = useState('');
     const [adding, setAdding] = useState(false);
 
+    const [subscription, setSubscription] = useState<any>(null);
+
     useEffect(() => {
         // Check if we are potentially in a callback flow
         const isCallback = window.location.hash.includes('access_token') || window.location.search.includes('code');
+        const isPaymentSuccess = window.location.search.includes('success=true');
+
+        if (isPaymentSuccess) {
+            // Clear the query param so it doesn't persist on refresh
+            window.history.replaceState(null, '', '/dashboard');
+            alert('Thank you for upgrading! Your account is now Pro.');
+        }
         if (isCallback) setLoading(true);
 
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             if (session) {
                 fetchSites(session.user.id);
+                fetchSubscription(session.user.id);
                 // Clean URL
                 window.history.replaceState(null, '', '/dashboard');
             } else if (!isCallback) {
@@ -35,6 +45,7 @@ export default function Dashboard() {
             if (event === 'SIGNED_IN' && session) {
                 setSession(session);
                 fetchSites(session.user.id);
+                fetchSubscription(session.user.id);
                 setLoading(false);
             }
             if (event === 'SIGNED_OUT') {
@@ -52,9 +63,22 @@ export default function Dashboard() {
         setLoading(false);
     }
 
+    async function fetchSubscription(userId: string) {
+        const { data } = await supabase.from('subscriptions').select('*').eq('user_id', userId).single();
+        if (data) setSubscription(data);
+    }
+
     async function addSite(e: React.FormEvent) {
         e.preventDefault();
         if (!session || !newUrl) return;
+
+        // Limit Check
+        const isPro = subscription?.status === 'active';
+        if (!isPro && sites.length >= 1) {
+            alert('Free plan is limited to 1 site. Please upgrade to Pro.');
+            return;
+        }
+
         setAdding(true);
 
         // Simple validation
@@ -90,8 +114,11 @@ export default function Dashboard() {
                 method: 'POST',
                 body: JSON.stringify({ siteId, email: session?.user?.email }),
             });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || res.statusText);
+            }
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
             alert('Scan complete! Found ' + data.result.brokenLinks.length + ' broken links.');
         } catch (e: any) {
             alert('Scan failed: ' + e.message);
@@ -99,35 +126,66 @@ export default function Dashboard() {
         fetchSites(session?.user.id);
     }
 
+    async function handleUpgrade() {
+        if (!session) return;
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                body: JSON.stringify({ userId: session.user.id, email: session.user.email }),
+            });
+            const data = await res.json();
+            if (data.url) window.location.href = data.url;
+            else alert('Error creating checkout');
+        } catch (e) {
+            alert('Error upgrading');
+        }
+    }
+
     if (loading) return <div className="p-10">Loading...</div>;
     if (!session) return <LoginPage />;
+
+    const isPro = subscription?.status === 'active';
 
     return (
         <div className="max-w-4xl mx-auto p-6">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Dead Link Sentinel</h1>
-                <button onClick={() => supabase.auth.signOut()} className="text-sm text-gray-500 hover:text-black">Sign Out</button>
+                <div className="flex items-center gap-4">
+                    {isPro ? (
+                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">PRO</span>
+                    ) : (
+                        <button onClick={handleUpgrade} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                            Upgrade to Pro
+                        </button>
+                    )}
+                    <button onClick={() => supabase.auth.signOut()} className="text-sm text-gray-500 hover:text-black">Sign Out</button>
+                </div>
             </div>
 
             {/* Add Site */}
             <div className="bg-white p-6 rounded-lg border shadow-sm mb-8">
                 <h2 className="text-lg font-semibold mb-4">Monitor a new site</h2>
-                <form onSubmit={addSite} className="flex gap-4">
-                    <input
-                        type="text"
-                        placeholder="example.com"
-                        value={newUrl}
-                        onChange={e => setNewUrl(e.target.value)}
-                        className="flex-1 p-2 border rounded-md"
-                        required
-                    />
-                    <button
-                        disabled={adding}
-                        className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
-                    >
-                        {adding ? 'Adding...' : 'Add Site'}
-                    </button>
-                </form>
+                <div className="flex gap-4 items-center">
+                    <form onSubmit={addSite} className="flex gap-4 flex-1">
+                        <input
+                            type="text"
+                            placeholder="example.com"
+                            value={newUrl}
+                            onChange={e => setNewUrl(e.target.value)}
+                            className="flex-1 p-2 border rounded-md"
+                            required
+                        />
+                        <button
+                            disabled={adding}
+                            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+                        >
+                            {adding ? 'Adding...' : 'Add Site'}
+                        </button>
+                    </form>
+                </div>
+                {!isPro && sites.length >= 1 && (
+                    <p className="text-xs text-amber-600 mt-2">Free plan limited to 1 site. Upgrade to add more.</p>
+                )}
             </div>
 
             {/* Sites Grid */}
